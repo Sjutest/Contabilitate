@@ -3,109 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Program de Contabilitate</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Management Pacienți</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        form { margin-bottom: 20px; }
+        input, button { padding: 8px; margin: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Program de Contabilitate</h1>
-        <nav>
-            <ul>
-                <li><a href="#facturare">Facturare</a></li>
-                <li><a href="#contabilitate">Contabilitate Primară</a></li>
-                <li><a href="#clienti">Management Clienți</a></li>
-                <li><a href="#stocuri">Stocuri</a></li>
-                <li><a href="#salarii">Salarii</a></li>
-                <li><a href="#rapoarte">Rapoarte</a></li>
-            </ul>
-        </nav>
-    </header>
+    <h2>Adaugă Pacient</h2>
+    <form id="patient-form">
+        <input type="text" id="name" placeholder="Nume" required>
+        <input type="number" id="age" placeholder="Vârstă" required>
+        <input type="text" id="gender" placeholder="Gen" required>
+        <input type="text" id="diagnosis" placeholder="Diagnostic" required>
+        <button type="submit">Adaugă</button>
+    </form>
+    
+    <h2>Lista Pacienților</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nume</th>
+                <th>Vârstă</th>
+                <th>Gen</th>
+                <th>Diagnostic</th>
+            </tr>
+        </thead>
+        <tbody id="patient-list"></tbody>
+    </table>
+    
+    <script>
+        document.getElementById('patient-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const diagnosis = document.getElementById('diagnosis').value;
+            
+            fetch('/patients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age, gender, diagnosis })
+            })
+            .then(response => response.json())
+            .then(() => { loadPatients(); document.getElementById('patient-form').reset(); });
+        });
 
-    <main>
-        <section id="facturare">
-            <h2>Facturare & Gestiunea Documentelor</h2>
-            <form id="facturaForm">
-                <label for="tipFactura">Tip Factură:</label>
-                <select id="tipFactura">
-                    <option value="proforma">Factură Proformă</option>
-                    <option value="storno">Factură Storno</option>
-                    <option value="recurring">Factură Recurentă</option>
-                </select>
-                <label for="client">Client:</label>
-                <input type="text" id="client" required>
-                <label for="suma">Sumă:</label>
-                <input type="number" id="suma" required>
-                <button type="submit">Emite Factură</button>
-            </form>
-        </section>
-
-        <section id="contabilitate">
-            <h2>Contabilitate Primară</h2>
-            <form id="contabilitateForm">
-                <label for="tipOperatiune">Tip Operațiune:</label>
-                <select id="tipOperatiune">
-                    <option value="incasare">Încasare</option>
-                    <option value="plata">Plată</option>
-                </select>
-                <label for="sumaOperatiune">Sumă:</label>
-                <input type="number" id="sumaOperatiune" required>
-                <button type="submit">Înregistrează Operațiune</button>
-            </form>
-        </section>
-
-        <section id="clienti">
-            <h2>Managementul Clienților și Furnizorilor</h2>
-            <form id="clientForm">
-                <label for="numeClient">Nume Client:</label>
-                <input type="text" id="numeClient" required>
-                <label for="tipClient">Tip Client:</label>
-                <select id="tipClient">
-                    <option value="client">Client</option>
-                    <option value="furnizor">Furnizor</option>
-                </select>
-                <button type="submit">Adaugă Client/Furnizor</button>
-            </form>
-        </section>
-
-        <section id="stocuri">
-            <h2>Stocuri & Gestiunea Mărfurilor</h2>
-            <form id="stocForm">
-                <label for="produs">Produs:</label>
-                <input type="text" id="produs" required>
-                <label for="cantitate">Cantitate:</label>
-                <input type="number" id="cantitate" required>
-                <button type="submit">Adaugă Produs</button>
-            </form>
-        </section>
-
-        <section id="salarii">
-            <h2>Salarii & Personal</h2>
-            <form id="salariiForm">
-                <label for="numeAngajat">Nume Angajat:</label>
-                <input type="text" id="numeAngajat" required <label for="salariu">Salariu:</label>
-                <input type="number" id="salariu" required>
-                <button type="submit">Calcul Salariu</button>
-            </form>
-        </section>
-
-        <section id="rapoarte">
-            <h2>Rapoarte Contabile & Declarații Fiscale</h2>
-            <form id="rapoarteForm">
-                <label for="tipRaport">Tip Raport:</label>
-                <select id="tipRaport">
-                    <option value="bilant">Bilanț Contabil</option>
-                    <option value="profitPierdere">Cont de Profit și Pierdere</option>
-                    <option value="declaratieTVA">Declarație TVA</option>
-                </select>
-                <button type="submit">Generare Raport</button>
-            </form>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2023 Program de Contabilitate. Toate drepturile rezervate.</p>
-    </footer>
-
-    <script src="script.js"></script>
+        function loadPatients() {
+            fetch('/patients')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('patient-list');
+                list.innerHTML = '';
+                data.forEach(patient => {
+                    const row = `<tr>
+                        <td>${patient[0]}</td>
+                        <td>${patient[1]}</td>
+                        <td>${patient[2]}</td>
+                        <td>${patient[3]}</td>
+                        <td>${patient[4]}</td>
+                    </tr>`;
+                    list.innerHTML += row;
+                });
+            });
+        }
+        loadPatients();
+    </script>
 </body>
 </html>
