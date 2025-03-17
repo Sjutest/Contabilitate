@@ -10,6 +10,7 @@
         input, button { padding: 8px; margin: 5px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .delete-btn, .edit-btn { cursor: pointer; color: red; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -31,6 +32,7 @@
                 <th>Vârstă</th>
                 <th>Gen</th>
                 <th>Diagnostic</th>
+                <th>Acțiuni</th>
             </tr>
         </thead>
         <tbody id="patient-list"></tbody>
@@ -66,11 +68,39 @@
                         <td>${patient[2]}</td>
                         <td>${patient[3]}</td>
                         <td>${patient[4]}</td>
+                        <td>
+                            <span class='edit-btn' onclick='editPatient(${patient[0]})'>✏️</span>
+                            <span class='delete-btn' onclick='deletePatient(${patient[0]})'>🗑️</span>
+                        </td>
                     </tr>`;
                     list.innerHTML += row;
                 });
             });
         }
+
+        function deletePatient(id) {
+            fetch(`/patients/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(() => loadPatients());
+        }
+
+        function editPatient(id) {
+            const name = prompt("Nume nou:");
+            const age = prompt("Vârstă nouă:");
+            const gender = prompt("Gen nou:");
+            const diagnosis = prompt("Diagnostic nou:");
+            
+            if (name && age && gender && diagnosis) {
+                fetch(`/patients/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, age, gender, diagnosis })
+                })
+                .then(response => response.json())
+                .then(() => loadPatients());
+            }
+        }
+
         loadPatients();
     </script>
 </body>
